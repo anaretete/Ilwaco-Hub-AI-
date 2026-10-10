@@ -1,0 +1,23 @@
+{
+  "name": "bitchord-audio",
+  "version": "1.0.0",
+  "description": "BitChord Audio Player Service and Stream Resolution Pipeline rewritten in TypeScript using Web Audio API and HTML5 Audio",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc --build",
+    "test": "tsc -p tsconfig.test.json && node dist-test/run-tests.js"
+  },
+  "keywords": [
+    "bitchord",
+    "webaudio",
+    "audio-player",
+    "innertube",
+    "crossfade",
+    "dsp",
+    "equalizer",
+    "streaming"
+  ],
+  "license": "GPL-3.0"
+}

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BitChord - High Fidelity Music Player</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="https://bitchord.kushagrasingh.in/icon.png">
+</head>
+<body>
+  <div class="ambient-background" id="ambientBg"></div>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header class="player-header">
+      <button class="header-btn" id="btnCollapse" title="Minimize">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+
+      <div class="header-title-group">
+        <div class="header-label" id="albumLabel">Playing from Album</div>
+        <div class="quality-badge lossless" id="qualityBadge">FLAC • 24-bit/96kHz</div>
+      </div>
+
+      <button class="header-btn" id="btnMore" title="Settings / Options">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/><circle cx="5" cy="12" r="1.5"/></svg>
+      </button>
+    </header>
+
+    <!-- Artwork & Live Visualizer Overlay -->
+    <section class="artwork-container">
+      <div class="artwork-card" id="artworkCard">
+        <img class="artwork-img" id="artworkImg" src="https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=600&q=80" alt="Album Art">
+        <canvas class="visualizer-canvas" id="visualizerCanvas"></canvas>
+      </div>
+    </section>
+
+    <!-- Track Metadata & Like Action -->
+    <section class="track-info-container">
+      <div class="track-text">
+        <h1 class="track-title" id="trackTitle">Midnight City</h1>
+        <div class="track-artist" id="trackArtist">M83 — Hurry Up, We're Dreaming</div>
+      </div>
+      <button class="like-btn" id="btnLike" title="Favorite">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+      </button>
+    </section>
+
+    <!-- BitChord Live Audio Signal Flow Pipeline View -->
+    <section class="pipeline-status-container">
+      <div class="pipeline-header">
+        <span>Live Audio Pipeline</span>
+        <span id="pipelineActiveDeckLabel">Deck A (Active)</span>
+      </div>
+      <div class="pipeline-flow">
+        <div class="pipeline-node active" id="nodeSource">
+          <div class="node-dot"></div>
+          <div class="node-label" id="nodeSourceLabel">FLAC</div>
+        </div>
+        <div class="pipeline-arrow">➔</div>
+        <div class="pipeline-node active" id="nodeEQ">
+          <div class="node-dot"></div>
+          <div class="node-label">10-EQ</div>
+        </div>
+        <div class="pipeline-arrow">➔</div>
+        <div class="pipeline-node active" id="nodeSpatial">
+          <div class="node-dot"></div>
+          <div class="node-label">Spatial</div>
+        </div>
+        <div class="pipeline-arrow">➔</div>
+        <div class="pipeline-node active" id="nodeLufs">
+          <div class="node-dot"></div>
+          <div class="node-label">-14 LUFS</div>
+        </div>
+        <div class="pipeline-arrow">➔</div>
+        <div class="pipeline-node active" id="nodeDac">
+          <div class="node-dot"></div>
+          <div class="node-label">DAC Out</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Timeline & Scrub Bar -->
+    <section class="scrub-container">
+      <input type="range" class="timeline-slider" id="timelineSlider" min="0" max="100" value="0" step="0.1">
+      <div class="time-labels">
+        <span id="timeElapsed">0:00</span>
+        <span id="timeRemaining">-0:00</span>
+      </div>
+    </section>
+
+    <!-- Transport Controls -->
+    <section class="transport-controls">
+      <button class="transport-btn" id="btnShuffle" title="Shuffle">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16 3h5v5M4 20l17-17M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>
+      </button>
+
+      <button class="transport-btn" id="btnPrev" title="Previous Track">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+      </button>
+
+      <button class="transport-btn play-pause-btn" id="btnPlayPause" title="Play / Pause">
+        <svg id="iconPlay" width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        <svg id="iconPause" width="28" height="28" viewBox="0 0 24 24" fill="currentColor" style="display:none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+      </button>
+
+      <button class="transport-btn" id="btnNext" title="Next Track (Crossfades)">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+      </button>
+
+      <button class="transport-btn" id="btnRepeat" title="Repeat Mode">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 1l4 4-4 4M3 11V9a4 4 0 0 1 4-4h14M7 23l-4-4 4-4M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+      </button>
+    </section>
+
+    <!-- Bottom Toolbar (Volume & Tools) -->
+    <footer class="bottom-toolbar">
+      <div class="volume-row">
+        <span class="volume-icon" id="btnMute">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+        </span>
+        <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.01" value="0.85">
+      </div>
+
+      <div class="tools-row">
+        <button class="tool-btn" id="btnOpenEQ">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg>
+          Equalizer
+        </button>
+
+        <button class="tool-btn" id="btnOpenStats">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+          Stats for Nerds
+        </button>
+
+        <button class="tool-btn" id="btnOpenQueue">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          Queue
+        </button>
+      </div>
+    </footer>
+
+    <!-- Equalizer & Spatializer Modal Sheet -->
+    <div class="modal-drawer" id="modalEQ">
+      <div class="modal-drag-handle"></div>
+      <div class="modal-header">
+        <h2 class="modal-title">Dynamic Equalizer & DSP</h2>
+        <button class="close-modal-btn" id="btnCloseEQ">✕</button>
+      </div>
+      <div class="eq-container">
+        <select class="eq-preset-select" id="eqPresetSelect">
+          <option value="flat">Preset: Flat</option>
+          <option value="bassBoost" selected>Preset: Bass Boost</option>
+          <option value="trebleBoost">Preset: Treble Boost</option>
+          <option value="vocalBoost">Preset: Vocal Boost</option>
+          <option value="electronic">Preset: Electronic</option>
+          <option value="rock">Preset: Rock</option>
+          <option value="acoustic">Preset: Acoustic</option>
+        </select>
+
+        <div class="eq-sliders-row" id="eqSlidersRow">
+          <!-- 10 vertical sliders dynamically populated -->
+        </div>
+
+        <div class="eq-toggle-row">
+          <span>Stereo Spatialization (Virtual 5.1)</span>
+          <input type="checkbox" id="chkSpatial" checked>
+        </div>
+
+        <div class="eq-toggle-row">
+          <span>Loudness Normalization (-14 LUFS)</span>
+          <input type="checkbox" id="chkNormalizer" checked>
+        </div>
+
+        <div class="eq-toggle-row">
+          <span>Equal-Power Crossfade (s)</span>
+          <input type="range" id="crossfadeSlider" min="0" max="12" value="4" step="1">
+          <span id="crossfadeValueLabel">4s</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Queue Drawer Sheet -->
+    <div class="modal-drawer" id="modalQueue">
+      <div class="modal-drag-handle"></div>
+      <div class="modal-header">
+        <h2 class="modal-title">Play Queue</h2>
+        <button class="close-modal-btn" id="btnCloseQueue">✕</button>
+      </div>
+      <div class="queue-list" id="queueList">
+        <!-- Rendered items -->
+      </div>
+    </div>
+
+    <!-- Stats for Nerds Modal Sheet -->
+    <div class="modal-drawer" id="modalStats">
+      <div class="modal-drag-handle"></div>
+      <div class="modal-header">
+        <h2 class="modal-title">Audio Pipeline & Telemetry</h2>
+        <button class="close-modal-btn" id="btnCloseStats">✕</button>
+      </div>
+      <table class="nerd-stats-table">
+        <tr><td>Audio Codec</td><td id="statCodec">FLAC (Lossless)</td></tr>
+        <tr><td>Bitrate</td><td id="statBitrate">1411 kbps</td></tr>
+        <tr><td>Sample Rate / Depth</td><td id="statSampleRate">96,000 Hz / 24-bit</td></tr>
+        <tr><td>Channels</td><td id="statChannels">Stereo (2.0)</td></tr>
+        <tr><td>Source Provider</td><td id="statSource">Custom Hi-Res Module</td></tr>
+        <tr><td>Loudness Target</td><td id="statLufs">-14.0 LUFS</td></tr>
+        <tr><td>Active Playback Deck</td><td id="statDeck">Deck A</td></tr>
+        <tr><td>Crossfader State</td><td id="statCrossfade">Idle</td></tr>
+        <tr><td>Buffer Ahead</td><td id="statBuffer">18.4s</td></tr>
+        <tr><td>AudioContext Latency</td><td id="statLatency">10 ms</td></tr>
+        <tr><td>Web Audio DSP Chain</td><td id="statDsp">EQ + Spatial + Limiter</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <script type="module" src="../dist/ui/app.js"></script>
+</body>
+</html>
